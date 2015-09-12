@@ -17,11 +17,6 @@ class ContactFormService extends BaseApplicationComponent
 	{
 		$settings = craft()->plugins->getPlugin('contactform')->getSettings();
 
-		if (!$settings->toEmail)
-		{
-			throw new Exception('The "To Email" address is not set on the plugin’s settings page.');
-		}
-
 		// Fire an 'onBeforeSend' event
 		Craft::import('plugins.contactform.events.ContactFormEvent');
 		$event = new ContactFormEvent($this, array('message' => $message));
@@ -31,8 +26,19 @@ class ContactFormService extends BaseApplicationComponent
 		{
 			if (!$event->fakeIt)
 			{
-				$toEmails = ArrayHelper::stringToArray($settings->toEmail);
-
+				// Get the relevant email address(es) for the message subject
+				foreach ($settings->toEmail as $row)
+				{
+					if ($message->subject == $row['subject'])
+					{
+						if (!$row['email'])
+						{
+							throw new Exception('The "To Email" address is not set on the plugin’s settings page.');
+						}
+						$toEmails = ArrayHelper::stringToArray($row['email']);
+					}
+				}
+				
 				foreach ($toEmails as $toEmail)
 				{
 					$email = new EmailModel();

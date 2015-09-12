@@ -1,13 +1,16 @@
 {% import "_includes/forms" as forms %}
 
-{{ forms.textField({
+{{ forms.editableTableField({
 	first:        true,
 	label:        "To Email"|t,
 	id:           'toEmail',
 	name:         'toEmail',
-	instructions: "The email address(es) that the contact form will send to. Separate multiple email addresses with commas."|t,
-	value:        settings.toEmail,
-	autofocus:    true,
+	instructions: "The subjects and associated email address(es) for the contact form."|t,
+	cols:         { 
+				  	'subject' : {heading: 'Subject', type: 'singleline'},
+				  	'email' : {heading: 'Email', type: 'singleline'},
+				  },
+	rows:         settings.toEmail,
 	errors:       settings.getErrors('toEmail')
 }) }}
 
