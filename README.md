@@ -42,7 +42,14 @@ Your contact form template can look something like this:
     {{ message is defined and message ? errorList(message.getErrors('fromEmail')) }}
 
     <h3><label for="subject">Subject</label></h3>
-    <input id="subject" type="text" name="subject" value="{% if message is defined %}{{ message.subject }}{% endif %}">
+    <select id="subject" name="subject">
+        <option value="" selected="selected">Select one</option>
+        {# Get the subjects defined in the plugin settings and list them as options in a dropdown #}
+        {% for row in craft.contactform.settings.toEmail %}
+            {% set subject = row.subject %}
+            <option value="{{ subject }}" {% if message is defined and message.subject == subject %}selected="selected"{% endif %}>{{ subject }}</option>
+        {% endfor %}
+    </select>
     {{ message is defined and message ? errorList(message.getErrors('subject')) }}
 
     <h3><label for="message">Message</label></h3>
@@ -53,7 +60,7 @@ Your contact form template can look something like this:
 </form>
 ```
 
-The only required fields are “fromEmail” and “message”. Everything else is optional.
+The required fields are "fromName", “fromEmail”, "subject" and “message”.
 
 ### Redirecting after submit
 
