@@ -50,7 +50,8 @@ class ContactFormService extends BaseApplicationComponent
 					$email->fromName  = $settings->prependSender . ($settings->prependSender && $message->fromName ? ' ' : '') . $message->fromName;
 					$email->toEmail   = $toEmail;
 					$email->subject   = $settings->prependSubject . ($settings->prependSubject && $message->subject ? ' - ' : '') . $message->subject;
-					$email->body      = $message->message;
+					$email->body      = "An email has been sent by $message->fromName ($message->fromEmail) using the contact form on the website. Here is the message:\n\n".$message->message;
+
 
 					if ($message->attachment)
 					{
