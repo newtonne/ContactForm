@@ -1,7 +1,8 @@
-# Contact Form plugin for Craft
+# Contact Form plugin for Craft with subject-based recipients
 
-This plugin allows you to add an email contact form to your website.
+This plugin allows you to add an email contact form to your website. It is a fork of pixelandtonic's [ContactForm](https://github.com/pixelandtonic/ContactForm), adding the ability to direct messages to different recipients based on the subject of the query.
 
+![Screenshot of "To Email" setting](https://cloud.githubusercontent.com/assets/14221622/14092552/a362efe8-f53f-11e5-90ea-8ef30b7f00c0.png)
 
 ## Installation
 
