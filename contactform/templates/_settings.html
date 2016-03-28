@@ -1,26 +1,39 @@
 {% import "_includes/forms" as forms %}
 
+{% macro configWarning(setting) -%}
+	{{ "This is being overridden by the {setting} config setting in your contactform.php config file."|t({
+		setting: setting
+	})|raw }}
+{%- endmacro %}
+
+{% from _self import configWarning %}
+
 {{ forms.editableTableField({
 	first:        true,
 	label:        "To Email"|t,
+	required:     true,
 	id:           'toEmail',
 	name:         'toEmail',
-	instructions: "The subjects and associated email address(es) for the contact form."|t,
-	cols:         { 
+	instructions: "The subjects and associated email address(es) that the contact form will send to. Separate multiple email addresses with commas."|t,
+	cols:         {
 				  	'subject' : {heading: 'Subject', type: 'singleline'},
 				  	'email' : {heading: 'Email', type: 'singleline'},
 				  },
 	rows:         settings.toEmail,
+	disabled:     (craft.config.get('toEmail', 'contactform') is not sameas(null)),
+	warning:      (craft.config.get('toEmail', 'contactform') is not sameas(null)) ? configWarning('toEmail'),
 	errors:       settings.getErrors('toEmail')
 }) }}
 
 {{ forms.textField({
-	label:         "Sender Text"|t,
-	id:            'prependSender',
-	name:          'prependSender',
+	label:        "Sender Text"|t,
+	id:           'prependSender',
+	name:         'prependSender',
 	instructions: "Text that will be prepended to the email’s From Name to inform who the Contact Form actually was sent by."|t,
-	value:         (settings.prependSender ? settings.prependSender : "On behalf of"|t),
-	errors:        settings.getErrors('prependSender')
+	value:        (settings.prependSender ? settings.prependSender : ""),
+	disabled:     (craft.config.get('prependSender', 'contactform') is not sameas(null)),
+	warning:      (craft.config.get('prependSender', 'contactform') is not sameas(null)) ? configWarning('prependSender'),
+	errors:       settings.getErrors('prependSender')
 }) }}
 
 {{ forms.textField({
@@ -28,7 +41,9 @@
 	id:           'prependSubject',
 	name:         'prependSubject',
 	instructions: "Text that will be prepended to the email’s Subject to flag that it comes from the Contact Form."|t,
-	value:        (settings.prependSubject ? settings.prependSubject : "New message from {siteName}"|t({ siteName: craft.app.siteName })),
+	value:        (settings.prependSubject ? settings.prependSubject : ""),
+	disabled:     (craft.config.get('prependSubject', 'contactform') is not sameas(null)),
+	warning:      (craft.config.get('prependSubject', 'contactform') is not sameas(null)) ? configWarning('prependSubject'),
 	errors:       settings.getErrors('prependSubject')
 }) }}
 
@@ -37,9 +52,10 @@
 	id:           'allowAttachments',
 	name:         'allowAttachments',
 	on:           settings.allowAttachments,
+	disabled:     (craft.config.get('allowAttachments', 'contactform') is not sameas(null)),
+	warning:      (craft.config.get('allowAttachments', 'contactform') is not sameas(null)) ? configWarning('allowAttachments'),
 	errors:       settings.getErrors('allowAttachments')
 }) }}
-
 
 {{ forms.textField({
 	label:        "Honeypot Field"|t,
@@ -47,6 +63,18 @@
 	name:         'honeypotField',
 	instructions: "The name of the 'honeypot' field in your Contact Form."|t,
 	value:        settings.honeypotField,
+	disabled:     (craft.config.get('honeypotField', 'contactform') is not sameas(null)),
+	warning:      (craft.config.get('honeypotField', 'contactform') is not sameas(null)) ? configWarning('honeypotField'),
 	errors:       settings.getErrors('honeypotField')
 }) }}
 
+{{ forms.textField({
+	label:        "Success Flash Message"|t,
+	id:           "successFlashMessage",
+	name:         "successFlashMessage",
+	instructions: "The flash message displayed after successfully sending a message."|t,
+	value:        settings.successFlashMessage,
+	disabled:     (craft.config.get('successFlashMessage', 'contactform') is not sameas(null)),
+	warning:      (craft.config.get('successFlashMessage', 'contactform') is not sameas(null)) ? configWarning('successFlashMessage'),
+	errors:       settings.getErrors('successFlashMessage')
+}) }}

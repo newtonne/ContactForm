@@ -38,7 +38,7 @@ class ContactFormService extends BaseApplicationComponent
 						$toEmails = ArrayHelper::stringToArray($row['email']);
 					}
 				}
-				
+
 				foreach ($toEmails as $toEmail)
 				{
 					$email = new EmailModel();
@@ -53,9 +53,15 @@ class ContactFormService extends BaseApplicationComponent
 					$email->body      = "An email has been sent by $message->fromName ($message->fromEmail) using the contact form on the website. Here is the message:\n\n".$message->message;
 
 
-					if ($message->attachment)
+					if (!empty($message->attachment))
 					{
-						$email->addAttachment($message->attachment->getTempName(), $message->attachment->getName(), 'base64', $message->attachment->getType());
+						foreach ($message->attachment as $attachment)
+						{
+							if ($attachment)
+							{
+								$email->addAttachment($attachment->getTempName(), $attachment->getName(), 'base64', $attachment->getType());
+							}
+						}
 					}
 
 					craft()->email->sendEmail($email);

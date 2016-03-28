@@ -122,6 +122,52 @@ An email sent with the above form might result in the following message:
 
     Cathy Chino
 
+### Overriding plugin settings
+
+If you create a [config file](https://craftcms.com/docs/config-settings) in your `craft/config` folder called `contactform.php`, you can override
+the plugin’s settings in the control panel.  Since that config file is fully [multi-environment](https://craftcms.com/docs/multi-environment-configs) aware, this is
+a handy way to have different settings across multiple environments.
+
+Here’s what that config file might look like along with a list of all of the possible values you can override.
+
+```php
+    <?php
+
+    return array(
+        'toEmail'             => 'bond@007.com',
+        'prependSubject'      => '',
+        'prependSender'       => '',
+        'allowAttachments'    => false,
+        'honeypotField'       => 'dieSpammers',
+        'successFlashMessage' => 'Congrats, yo!'
+    );
+```
+
+### Dynamically adding email recipients (requires Craft 2.5+)
+You can programatically add email recipients from your template by adding a hidden input field named “toEmail” like so:
+
+    <input type="hidden" name="toEmail" value="{{ 'me@example.com'|hash }}">
+
+If you want to add multiple recipients, you can provide a comma separated list of emails like so:
+
+    <input type="hidden" name="toEmail" value="{{ 'me@example.com,me2@example.com'|hash }}">
+
+Then from your `craft/config/contactform.php` config file, you’ll need to add a bit of logic:
+
+```php
+    <?php
+    namespace Craft;
+
+    $toEmail = craft()->request->getPost('toEmail');
+    $toEmail = craft()->security->validateData($toEmail);
+
+    return array(
+        'toEmail' => ($toEmail ?: null),
+        ...
+    );
+```
+
+In this example if `$toEmail` does not exist or fails validation (it was tampered with), the plugin will fallback to the “toEmail” defined in the plugin settings, so you must have that defined as well.
 
 ### The “Honeypot” field
 The [Honeypot Captcha][honeypot] is a simple anti-spam technique, which greatly reduces the efficacy of spambots without expecting your visitors to decipher various tortured letterforms.
@@ -154,6 +200,7 @@ If you would like your contact form to accept file attachments, follow these ste
 1. Go to Settings > Plugins > Contact Form in your CP and make sure the plugin is set to allow attachments.
 2. Make sure your opening HTML `<form>` tag contains `enctype="multipart/form-data"`.
 3. Add a `<input type="file" name="attachment">` to your form.
+4. If you want to allow multiple file attachments, use multiple `<input type="file" name="attachment[]">` inputs.
 
 
 ### Ajax form submissions
@@ -221,26 +268,43 @@ class SomePlugin extends BasePlugin
 
 ## Changelog
 
-### 1.4
+### 1.7.0
+
+* Added the ability to access individual message fields values via `message.messageFields` when a validation error occurred. For example, the value of the input `message[Phone]` can now be accessed via `message.messageFields['Phone']`.
+* Custom message field values only have a single line break between them in the generated email body now, rather than two.
+
+### 1.6.0
+
+* Added the ability to attach multiple files to the contact email.
+* Added the ability to change the flash success message via the "successFlashMessage" setting.
+* Added the ability to override plugin settings via a `craft/config/contactform.php` config setting.
+* The "prependSender" and "prependSubject" settings can now be empty strings.
+* Fixed a bug where the "allowAttachments" config setting wasn't being respected.
+
+### 1.5.0
+
+* Added support for some Craft 2.5 features.
+
+### 1.4.0
 
 * Added support for passing `{fromName}`, `{fromEmail}`, and `{subject}` in the ‘redirect’ URL.
 
-### 1.3
+### 1.3.0
 
 * Added support for multiple email addresses
 * Added the ContactFormService
 * Added the `contactForm.beforeSend` event, allowing third party plugins to add extra validation
 
-### 1.2
+### 1.2.0
 
 * Added honeypot captcha support
 
-### 1.1
+### 1.1.0
 
 * Added the ability to submit attachments
 * Added the ability to submit the form over Ajax
 * Added the ability to submit checkbox lists, which get compiled into comma-separated lists in the email
 
-### 1.0
+### 1.0.0
 
 * Initial release
