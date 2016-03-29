@@ -16,7 +16,7 @@ class ContactFormPlugin extends BasePlugin
 	 */
 	public function getVersion()
 	{
-		return '1.7.0';
+		return '1.7.1';
 	}
 
 	public function getSchemaVersion()
@@ -29,7 +29,7 @@ class ContactFormPlugin extends BasePlugin
 	 */
 	public function getDeveloper()
 	{
-		return 'Pixel & Tonic';
+		return 'newtonne';
 	}
 
 	/**
@@ -37,7 +37,7 @@ class ContactFormPlugin extends BasePlugin
 	 */
 	public function getDeveloperUrl()
 	{
-		return 'http://pixelandtonic.com';
+		return 'https://github.com/newtonne';
 	}
 
 	/**
@@ -45,7 +45,7 @@ class ContactFormPlugin extends BasePlugin
 	 */
 	public function getPluginUrl()
 	{
-		return 'https://github.com/pixelandtonic/ContactForm';
+		return 'https://github.com/newtonne/ContactForm';
 	}
 
 	/**
@@ -61,7 +61,7 @@ class ContactFormPlugin extends BasePlugin
 	 */
 	public function getReleaseFeedUrl()
 	{
-		return 'https://raw.githubusercontent.com/pixelandtonic/ContactForm/master/releases.json';
+		return 'https://raw.githubusercontent.com/newtonne/ContactForm/master/releases.json';
 	}
 
 	/**
