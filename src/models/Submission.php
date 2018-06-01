@@ -61,7 +61,7 @@ class Submission extends Model
     public function rules()
     {
         return [
-            [['fromEmail', 'message'], 'required'],
+            [['fromName', 'fromEmail', 'message', 'subject'], 'required'],
         ];
     }
 }

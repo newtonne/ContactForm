@@ -81,8 +81,15 @@ class Mailer extends Component
             }
         }
 
-        // Grab any "to" emails set in the plugin settings.
-        $toEmails = is_string($settings->toEmail) ? StringHelper::split($settings->toEmail) : $settings->toEmail;
+        // Get the relevant email address(es) for the message subject
+        foreach ($settings->toEmail as $row)
+        {
+            if ($submission->subject == $row['subject'])
+            {
+                // Grab any "to" emails set in the plugin settings.
+                $toEmails = is_string($row['email']) ? StringHelper::split($row['email']) : $row['email'];
+            }
+        }
 
         // Fire a 'beforeSend' event
         $event = new SendEvent([

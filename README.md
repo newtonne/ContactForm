@@ -1,6 +1,8 @@
-# Contact Form plugin for Craft
+# Contact Form plugin for Craft with subject-based recipients
 
-This plugin allows you to add an email contact form to your website.
+This plugin allows you to add an email contact form to your website. It is a fork of [craftcms/contact-form](https://github.com/craftcms/contact-form), adding the ability to direct messages to different recipients based on the subject of the query.
+
+![Screenshot of "To Email" setting](https://cloud.githubusercontent.com/assets/14221622/14092552/a362efe8-f53f-11e5-90ea-8ef30b7f00c0.png)
 
 
 ## Requirements
@@ -53,7 +55,14 @@ Your contact form template can look something like this:
     {{ message is defined and message ? errorList(message.getErrors('fromEmail')) }}
 
     <h3><label for="subject">Subject</label></h3>
-    <input id="subject" type="text" name="subject" value="{{ message.subject ?? '' }}">
+    <select id="subject" name="subject">
+        <option value="" selected="selected">Select one</option>
+        {# Get the subjects defined in the plugin settings and list them as options in a dropdown #}
+        {% for row in craft.contactform.settings.toEmail %}
+            {% set subject = row.subject %}
+            <option value="{{ subject }}" {% if message is defined and message.subject == subject %}selected="selected"{% endif %}>{{ subject }}</option>
+        {% endfor %}
+    </select>
     {{ message is defined and message ? errorList(message.getErrors('subject')) }}
 
     <h3><label for="message">Message</label></h3>
@@ -64,7 +73,7 @@ Your contact form template can look something like this:
 </form>
 ```
 
-The only required fields are `fromEmail` and `message`. Everything else is optional.
+The required fields are "fromName", “fromEmail”, "subject" and “message”.
 
 ### Redirecting after submit
 

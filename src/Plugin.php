@@ -9,6 +9,9 @@ namespace craft\contactform;
 
 use Craft;
 use craft\contactform\models\Settings;
+use craft\contactform\variables\ContactFormVariable;
+use craft\web\twig\variables\CraftVariable;
+use yii\base\Event;
 
 /**
  * Class Plugin
@@ -30,6 +33,19 @@ class Plugin extends \craft\base\Plugin
     public function getMailer(): Mailer
     {
         return $this->get('mailer');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        parent::init();
+
+        Event::on(CraftVariable::class, CraftVariable::EVENT_INIT, function(Event $e) {
+            $variable = $e->sender;
+            $variable->set('contactform', ContactFormVariable::class);
+        });
     }
 
     /**

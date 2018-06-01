@@ -10,14 +10,18 @@
 
 {% from _self import configWarning %}
 
-{{ forms.textField({
+{{ forms.editableTableField({
     first:        true,
     label:        "To Email"|t('contact-form'),
     required:     true,
     id:           'toEmail',
     name:         'toEmail',
-    instructions: "The email address(es) that the contact form will send to. Separate multiple email addresses with commas."|t('contact-form'),
-    value:        settings.toEmail,
+    instructions: "The subjects and associated email address(es) for the contact form."|t('contact-form'),
+    cols:         {
+        'subject' : {heading: 'Subject', type: 'singleline'},
+        'email'   : {heading: 'Email'  , type: 'singleline'},
+    },
+    rows:         settings.toEmail,
     autofocus:    true,
     disabled:     'toEmail' in overrides,
     warning:      'toEmail' in overrides ? configWarning('toEmail'),

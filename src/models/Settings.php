@@ -65,7 +65,7 @@ class Settings extends Model
     {
         return [
             [['toEmail', 'successFlashMessage'], 'required'],
-            [['toEmail', 'prependSender', 'prependSubject', 'successFlashMessage'], 'string'],
+            [['prependSender', 'prependSubject', 'successFlashMessage'], 'string'],
         ];
     }
 }
