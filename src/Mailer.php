@@ -104,7 +104,7 @@ class Mailer extends Component
             return true;
         }
 
-        foreach ($toEmails as $toEmail) {
+        foreach ($event->toEmails as $toEmail) {
             $message->setTo($toEmail);
             $mailer->send($message);
         }
@@ -114,7 +114,7 @@ class Mailer extends Component
             $this->trigger(self::EVENT_AFTER_SEND, new SendEvent([
                 'submission' => $submission,
                 'message' => $message,
-                'toEmails' => $toEmails,
+                'toEmails' => $event->toEmails,
             ]));
         }
 
@@ -179,10 +179,13 @@ class Mailer extends Component
      */
     public function compileTextBody(Submission $submission): string
     {
-        $fields = [
-            Craft::t('contact-form', 'Name') => $submission->fromName,
-            Craft::t('contact-form', 'Email') => $submission->fromEmail,
-        ];
+        $fields = [];
+
+        if ($submission->fromName) {
+            $fields[Craft::t('contact-form', 'Name')] = $submission->fromName;
+        }
+
+        $fields[Craft::t('contact-form', 'Email')] = $submission->fromEmail;
 
         if (is_array($submission->message)) {
             $body = $submission->message['body'] ?? '';

@@ -62,6 +62,7 @@ class Submission extends Model
     {
         return [
             [['fromName', 'fromEmail', 'message', 'subject'], 'required'],
+            [['fromEmail'], 'email']
         ];
     }
 }

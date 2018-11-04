@@ -12,17 +12,36 @@ This plugin requires Craft CMS 3.0.0-RC11 or later. (For Craft 2 use the [`v1` b
 
 ## Installation
 
-To install the plugin, follow these instructions.
+You can install this plugin from the Plugin Store or with Composer.
 
-1. Open your terminal and go to your Craft project:
+#### From the Plugin Store
 
-        cd /path/to/project
+Go to the Plugin Store in your project’s Control Panel and search for “Contact Form”. Then click on the “Install” button in its modal window.
 
-2. Then tell Composer to load the plugin:
+#### With Composer
 
-        composer require craftcms/contact-form
+Open your terminal and run the following commands:
 
-3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Contact Form.
+```bash
+# go to the project directory
+cd /path/to/my-project.test
+
+# tell Composer to load the plugin
+composer require craftcms/contact-form
+
+# tell Craft to install the plugin
+./craft install/plugin contact-form
+```
+
+## Upgrading from Craft 2
+
+If you’re in the process of upgrading a Craft 2 project to Craft 3, follow these instructions to get Contact Form back up and running:
+
+1. [Install Contact Form 2.x](#installation).
+2. Update the `action` input values in your form templates from `contactForm/sendMessage` to `contact-form/send`.
+3. Make sure the `redirect` input values in your form templates are [hashed](https://docs.craftcms.com/v3/changes-in-craft-3.html#request-params).
+4. If you have a `craft/config/contactform.php` file, move it to `config/` and rename it to `contact-form.php`.
+5. If you were using the honeypot captcha feature, install the new [Contact Form Honeypot](https://github.com/craftcms/contact-form-honeypot) plugin.
 
 ## Usage
 
@@ -85,7 +104,9 @@ If you have a `redirect` hidden input, the user will get redirected to it upon s
 
 For example, if you wanted to redirect to a `contact/thanks` page and pass the sender’s name to it, you could set the input like this:
 
-    {{ redirectInput('contact/thanks?from={fromName}') }}
+```twig
+{{ redirectInput('contact/thanks?from={fromName}') }}
+```
 
 On your `contact/thanks.html` template, you can access that `from` parameter using `craft.app.request.getQueryParam()`:
 
@@ -155,39 +176,50 @@ a handy way to have different settings across multiple environments.
 Here’s what that config file might look like along with a list of all of the possible values you can override.
 
 ```php
-    <?php
+<?php
 
-    return [
-        'toEmail'             => 'bond@007.com',
-        'prependSubject'      => '',
-        'prependSender'       => '',
-        'allowAttachments'    => false,
-        'successFlashMessage' => 'Message sent!'
-    ];
+return [
+    'toEmail'             => 'bond@007.com',
+    'prependSubject'      => '',
+    'prependSender'       => '',
+    'allowAttachments'    => false,
+    'successFlashMessage' => 'Message sent!'
+];
 ```
 
 ### Dynamically adding email recipients
 
 You can programmatically add email recipients from your template by adding a hidden input field named `toEmail` like so:
 
-    <input type="hidden" name="toEmail" value="{{ 'me@example.com'|hash }}">
+```twig
+<input type="hidden" name="toEmail" value="{{ 'me@example.com'|hash }}">
+```
 
 If you want to add multiple recipients, you can provide a comma separated list of emails like so:
 
-    <input type="hidden" name="toEmail" value="{{ 'me@example.com,me2@example.com'|hash }}">
+```twig
+<input type="hidden" name="toEmail" value="{{ 'me@example.com,me2@example.com'|hash }}">
+```
 
-Then from your `craft/config/contact-form.php` config file, you’ll need to add a bit of logic:
+Then from your `config/contact-form.php` config file, you’ll need to add a bit of logic:
 
 ```php
 <?php
 
-return [
-    'toEmail' => Craft::$app->request->getValidatedBodyParam('toEmail'),
-    // ...
-];
+$config = [];
+$request = Craft::$app->request;
+
+if (
+    !$request->getIsConsoleRequest() &&
+    ($toEmail = $request->getValidatedBodyParam('toEmail')) !== null
+) {
+    $config['toEmail'] = $toEmail;
+}
+
+return $config;
 ```
 
-In this example if `$toEmail` does not exist or fails validation (it was tampered with), the plugin will fallback to the “To Email” defined in the plugin settings, so you must have that defined as well.
+In this example if `toEmail` does not exist or fails validation (it was tampered with), the plugin will fallback to the “To Email” defined in the plugin settings, so you must have that defined as well.
 
 ### File attachments
 
@@ -226,25 +258,26 @@ $('#my-form').submit(function(ev) {
 });
 ```
 
-### The `beforeValidate` event
+### The `afterValidate` event
 
-Plugins can be notified when a submission is being validated, providing their own custom validation logic, using the `beforeValidate` event on the `Submission` model:
+Modules and plugins can be notified when a submission is being validated, providing their own custom validation logic, using the `afterValidate` event on the `Submission` model:
 
 ```php
 use craft\contactform\models\Submission;
 use yii\base\Event;
-use yii\base\ModelEvent;
+use yii\base\Event;
 
 // ...
 
-Event::on(Submission::class, Submission::EVENT_BEFORE_VALIDATE, function(ModelEvent $e) {
+Event::on(Submission::class, Submission::EVENT_AFTER_VALIDATE, function(Event $e) {
     /** @var Submission $submission */
     $submission = $e->sender;
-    $validates = // custom validation logic...
     
-    if (!$validates) {
-        $submission->addError('someAttribute', 'Error message');
-        $e->isValid = false;
+    // Make sure that `message[Phone]` was filled in
+    if (empty($submission->message['Phone']) {
+        // Add the error
+        // (This will be accessible via `message.getErrors('message.phone')` in the template.)
+        $submission->addError('message.phone', 'A phone number is required.');
     }
 });
 ```
@@ -252,7 +285,7 @@ Event::on(Submission::class, Submission::EVENT_BEFORE_VALIDATE, function(ModelEv
 
 ### The `beforeSend` event
 
-Plugins can be notified right before a message is sent out to the recipients using the `beforeSend` event. This is also an opportunity to flag the message as spam, preventing it from getting sent:
+Modules and plugins can be notified right before a message is sent out to the recipients using the `beforeSend` event. This is also an opportunity to flag the message as spam, preventing it from getting sent:
 
 ```php
 use craft\contactform\events\SendEvent;
@@ -263,7 +296,7 @@ use yii\base\Event;
 
 Event::on(Mailer::class, Mailer::EVENT_BEFORE_SEND, function(SendEvent $e) {
     $isSpam = // custom spam detection logic...
-    
+
     if (!$isSpam) {
         $e->isSpam = true;
     }
@@ -273,7 +306,7 @@ Event::on(Mailer::class, Mailer::EVENT_BEFORE_SEND, function(SendEvent $e) {
 
 ### The `afterSend` event
 
-Plugins can be notified right after a message is sent out to the recipients using the `afterSend` event.
+Modules and plugins can be notified right after a message is sent out to the recipients using the `afterSend` event.
 
 ```php
 use craft\contactform\events\SendEvent;
@@ -286,3 +319,7 @@ Event::on(Mailer::class, Mailer::EVENT_AFTER_SEND, function(SendEvent $e) {
     // custom logic...
 });
 ```
+
+### Using a “Honeypot” field
+
+Support for the [honeypot captcha technique](https://haacked.com/archive/2007/09/11/honeypot-captcha.aspx/) to fight spam has been moved to a [separate plugin](https://github.com/craftcms/contact-form-honeypot) that complements this one.
